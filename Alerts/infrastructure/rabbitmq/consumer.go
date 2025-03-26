@@ -4,6 +4,8 @@ import (
 	"log"
 	"time"
 	"fmt"
+	"strconv"
+	"regexp"
 
 	"github.com/JosephAntony37900/Multi-API-Consumer-1/Alerts/application"
 	"github.com/JosephAntony37900/Multi-API-Consumer-1/helpers"
@@ -82,17 +84,23 @@ func StartAlertConsumer(service *application.CreateAlert, queueName, routingKey,
 	handleMessage := func(msg amqp.Delivery) {
 		log.Printf("Processing message: %s", msg.Body)
 
-		// Extraer el estado y el IdLectura del mensaje recibido
-		var estado string
-		var idLectura int
+		// Expresión regular para extraer Estado e IdLectura
+		re := regexp.MustCompile(`Estado: ([a-zA-Z]+), IdLectura: (\d+)`)
+		matches := re.FindStringSubmatch(string(msg.Body))
 
-		_, err := fmt.Sscanf(string(msg.Body), "Estado: %d, IdLectura: %d", &estado, &idLectura)
-		if err != nil {
-			log.Printf("Error al procesar el mensaje: %v", err)
+		if len(matches) != 3 {
+			log.Printf("Error: mensaje con formato incorrecto: %s", msg.Body)
 			return
 		}
 
-		// Procesar el mensaje como una alerta con los valores obtenidos
+		estado := matches[1]
+		idLectura, err := strconv.Atoi(matches[2])
+		if err != nil {
+			log.Printf("Error convirtiendo IdLectura a entero: %v", err)
+			return
+		}
+
+		// Procesar la alerta con los valores extraídos
 		err = service.Run(idLectura, estado, time.Now())
 		if err != nil {
 			log.Printf("Error al procesar la alerta: %v", err)
@@ -101,6 +109,7 @@ func StartAlertConsumer(service *application.CreateAlert, queueName, routingKey,
 
 	return ConfigureAndConsume(queueName, routingKey, exchangeName, handleMessage)
 }
+
 
 func logError(format string, args ...interface{}) error {
 	log.Printf(format, args...)
