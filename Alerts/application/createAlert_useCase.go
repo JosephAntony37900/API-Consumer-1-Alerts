@@ -17,26 +17,28 @@ func NewCreateAlert(repo repository.AlertRepository) *CreateAlert{
 	return &CreateAlert{repo: repo}
 }
 
-func (cal *CreateAlert) Run(Id_Lectura int, Estado string, Fecha_Creacion time.Time) error {
-	// Verificar si el Id_Lectura existe en la tabla Lectura_Nivel
-	exists, err := cal.repo.LevelReadingExists(Id_Lectura)
-	if err != nil {
-		return fmt.Errorf("error verificando la existencia del nivel de lectura: %w", err)
-	}
-	if !exists {
-		log.Printf("ID de lectura inválido en el mensaje de alerta: %d", Id_Lectura)
-		return fmt.Errorf("ID de lectura inválido")
-	}
+func (cal *CreateAlert) Run(Id_Lectura int, Estado string, Fecha_Creacion time.Time, Codigo_Identificador string, Tipo bool) error {
+    // Verificar si el Id_Lectura existe en la tabla Lectura_Nivel
+    exists, err := cal.repo.LevelReadingExists(Id_Lectura)
+    if err != nil {
+        return fmt.Errorf("error verificando la existencia del nivel de lectura: %w", err)
+    }
+    if !exists {
+        log.Printf("ID de lectura inválido en el mensaje de alerta: %d", Id_Lectura)
+        return fmt.Errorf("ID de lectura inválido")
+    }
 
-	alerts := entities.Alerts{
-		Id_Lectura:     Id_Lectura,
-		Estado:         Estado,
-		Fecha_Creacion: Fecha_Creacion,
-	}
+    alert := entities.Alerts{
+        Id_Lectura:          Id_Lectura,
+        Estado:              Estado,
+        Fecha_Creacion:      Fecha_Creacion,
+        Codigo_Identificador: Codigo_Identificador,
+        Tipo:                Tipo, // Nuevo atributo
+    }
 
-	if err := cal.repo.Save(alerts); err != nil {
-		return fmt.Errorf("error guardando la alerta: %w", err)
-	}
+    if err := cal.repo.Save(alert); err != nil {
+        return fmt.Errorf("error guardando la alerta: %w", err)
+    }
 
-	return nil
+    return nil
 }

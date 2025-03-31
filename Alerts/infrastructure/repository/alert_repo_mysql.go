@@ -19,15 +19,12 @@ func NewAlertRepoMySQL(db *sql.DB) repository.AlertRepository {
 }
 
 func (repo *alertRepoMySQL) Save(alert entities.Alerts) error {
-	query := `
-		INSERT INTO Alerta (Id_Lectura, Estado, Fecha_Creacion, IdRol)
-		VALUES (?, ?, ?, ?)
-	`
-	_, err := repo.db.Exec(query, alert.Id_Lectura, alert.Estado, alert.Fecha_Creacion, alert.IdRol)
-	if err != nil {
-		return fmt.Errorf("error guardando la alerta: %w", err)
-	}
-	return nil
+    query := "INSERT INTO Alerta (Id_Lectura, Estado, Fecha_Creacion, Codigo_Identificador, Tipo) VALUES (?, ?, ?, ?, ?)"
+    _, err := repo.db.Exec(query, alert.Id_Lectura, alert.Estado, alert.Fecha_Creacion, alert.Codigo_Identificador, alert.Tipo)
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
 func (repo *alertRepoMySQL) FindById(id int) (*entities.Alerts, error) {
@@ -48,19 +45,23 @@ func (repo *alertRepoMySQL) FindById(id int) (*entities.Alerts, error) {
 	return &alert, nil
 }
 
-func (repo *alertRepoMySQL) GetByUserId(id int) (*entities.Alerts, error) {
+func (repo *alertRepoMySQL) GetByCodigoIdentificador(codigoIdentificador string) (*entities.Alerts, error) {
 	query := `
-		SELECT Id, Id_Lectura, Estado, Fecha_Creacion, IdRol
-		FROM Alerta WHERE IdRol = ?
+		SELECT Id, Id_Lectura, Estado, Fecha_Creacion, Codigo_Identificador, Tipo
+		FROM Alerta
+		WHERE Codigo_Identificador = ?
+		ORDER BY Fecha_Creacion DESC
+		LIMIT 1
 	`
-	row := repo.db.QueryRow(query, id)
+
+	row := repo.db.QueryRow(query, codigoIdentificador)
 
 	var alert entities.Alerts
-	if err := row.Scan(&alert.Id, &alert.Id_Lectura, &alert.Estado, &alert.Fecha_Creacion, &alert.IdRol); err != nil {
+	if err := row.Scan(&alert.Id, &alert.Id_Lectura, &alert.Estado, &alert.Fecha_Creacion, &alert.Codigo_Identificador, &alert.Tipo); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil // No se encontraron alertas
+			return nil, nil // No se encontró ninguna alerta
 		}
-		return nil, fmt.Errorf("error obteniendo alerta por ID de usuario: %w", err)
+		return nil, fmt.Errorf("error obteniendo la alerta más reciente por Codigo_Identificador: %w", err)
 	}
 
 	return &alert, nil
@@ -75,3 +76,4 @@ func (repo *alertRepoMySQL) LevelReadingExists(id int) (bool, error) {
 	}
 	return count > 0, nil
 }
+

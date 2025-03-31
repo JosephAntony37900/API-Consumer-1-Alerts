@@ -8,4 +8,6 @@ type Alerts struct {
 	Estado         string
 	Fecha_Creacion time.Time
 	IdRol int
+	Codigo_Identificador string
+	Tipo bool
 }

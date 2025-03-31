@@ -44,14 +44,14 @@ func main() {
 
 	// Casos de uso
 	createAlertUseCase := application.NewCreateAlert(alertRepo)
-	getByUserIdAlertUseCase := application.NewGetByUserIdAlert(alertRepo)
+	getByCodigoIdAlertUseCase := application.NewGetByCodigoIdentificadorAlert(alertRepo)
 
 	// Controladores
 	createAlertController := controllers.NewCreateAlertController(createAlertUseCase)
-	getByUserIdAlertController := controllers.NewGetByUserIdAlertController(getByUserIdAlertUseCase)
+	getByCodigoIdAlertController := controllers.NewGetByCodigoIdentificadorAlertController(getByCodigoIdAlertUseCase)
 
 	engine := gin.Default()
-	routes.SetupAlertRoutes(engine, createAlertController, getByUserIdAlertController)
+	routes.SetupAlertRoutes(engine, createAlertController, getByCodigoIdAlertController)
 
 	// Iniciar consumo de mensajes desde RabbitMQ
 	go func() {
