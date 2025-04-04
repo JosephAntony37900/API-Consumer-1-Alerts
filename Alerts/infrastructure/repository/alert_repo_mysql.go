@@ -37,7 +37,7 @@ func (repo *alertRepoMySQL) FindById(id int) (*entities.Alerts, error) {
 	var alert entities.Alerts
 	if err := row.Scan(&alert.Id, &alert.Id_Lectura, &alert.Estado, &alert.Fecha_Creacion, &alert.IdRol); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil // No se encontraron alertas
+			return nil, nil 
 		}
 		return nil, fmt.Errorf("error obteniendo alerta por ID: %w", err)
 	}
@@ -59,7 +59,7 @@ func (repo *alertRepoMySQL) GetByCodigoIdentificador(codigoIdentificador string)
 	var alert entities.Alerts
 	if err := row.Scan(&alert.Id, &alert.Id_Lectura, &alert.Estado, &alert.Fecha_Creacion, &alert.Codigo_Identificador, &alert.Tipo); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil // No se encontró ninguna alerta
+			return nil, nil
 		}
 		return nil, fmt.Errorf("error obteniendo la alerta más reciente por Codigo_Identificador: %w", err)
 	}

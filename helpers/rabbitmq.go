@@ -1,42 +1,45 @@
 package helpers
 
 import (
-    "github.com/streadway/amqp"
-    "log"
+	"log"
+
+	"github.com/streadway/amqp"
 )
 
 var rabbitConn *amqp.Connection
 var rabbitChannel *amqp.Channel
 
 func InitRabbitMQ(uri string) error {
-    conn, err := amqp.Dial(uri)
-    if err != nil {
-        log.Printf("Failed to connect to RabbitMQ: %v", err)
-        return err
-    }
-    rabbitConn = conn
-    log.Println("Connected to RabbitMQ")
+	var err error
+	rabbitConn, err = amqp.Dial(uri)
+	if err != nil {
+		log.Printf("Failed to connect to RabbitMQ: %v", err)
+		return err
+	}
+	log.Println("Connected to RabbitMQ")
 
-    channel, err := conn.Channel()
-    if err != nil {
-        log.Printf("Failed to create RabbitMQ channel: %v", err)
-        return err
-    }
-    rabbitChannel = channel
-    return nil
+	rabbitChannel, err = rabbitConn.Channel()
+	if err != nil {
+		log.Printf("Failed to create RabbitMQ channel: %v", err)
+		return err
+	}
+	log.Println("RabbitMQ channel created")
+	return nil
 }
 
-// GetRabbitMQChannel retorna el canal de RabbitMQ para ser usado en otras capas.
 func GetRabbitMQChannel() *amqp.Channel {
-    return rabbitChannel
+	if rabbitChannel == nil {
+		log.Println("RabbitMQ channel is not initialized")
+	}
+	return rabbitChannel
 }
 
 func CloseRabbitMQ() {
-    if rabbitChannel != nil {
-        rabbitChannel.Close()
-    }
-    if rabbitConn != nil {
-        rabbitConn.Close()
-    }
-    log.Println("RabbitMQ connection closed")
+	if rabbitChannel != nil {
+		rabbitChannel.Close()
+	}
+	if rabbitConn != nil {
+		rabbitConn.Close()
+	}
+	log.Println("RabbitMQ connection closed")
 }
