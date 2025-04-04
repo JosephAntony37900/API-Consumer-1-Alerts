@@ -10,6 +10,7 @@ import (
 	"github.com/JosephAntony37900/Multi-API-Consumer-1/Alerts/application"
 	"github.com/JosephAntony37900/Multi-API-Consumer-1/helpers"
 	"github.com/streadway/amqp"
+	"github.com/JosephAntony37900/Multi-API-Consumer-1/Alerts/infrastructure/websocket"
 )
 
 func ConfigureAndConsume(queueName, routingKey, exchangeName string, handleMessage func(msg amqp.Delivery)) error {
@@ -105,6 +106,8 @@ func StartAlertConsumer(service *application.CreateAlert, queueName, routingKey,
         if err != nil {
             log.Printf("Error al procesar la alerta: %v", err)
         }
+		jsonMsg, _ := json.Marshal(payload)
+		websocket.BroadcastMessage(string(jsonMsg))
     }
 
     return ConfigureAndConsume(queueName, routingKey, exchangeName, handleMessage)

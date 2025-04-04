@@ -2,6 +2,8 @@ module github.com/JosephAntony37900/Multi-API-Consumer-1
 
 go 1.23.4
 
+require github.com/gorilla/websocket v1.5.3
+
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/bytedance/sonic v1.12.6 // indirect
