@@ -106,8 +106,7 @@ func StartAlertConsumer(service *application.CreateAlert, queueName, routingKey,
         if err != nil {
             log.Printf("Error al procesar la alerta: %v", err)
         }
-		jsonMsg, _ := json.Marshal(payload)
-		websocket.BroadcastMessage(string(jsonMsg))
+		websocket.BroadcastMessage(msg.Body)
     }
 
     return ConfigureAndConsume(queueName, routingKey, exchangeName, handleMessage)
